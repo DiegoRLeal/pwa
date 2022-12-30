@@ -1,4 +1,5 @@
 class PagesController < ApplicationController
-  def home
+  def offline
+    render 'offline', layout: false
   end
 end

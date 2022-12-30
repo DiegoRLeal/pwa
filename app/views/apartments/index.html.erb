@@ -1,0 +1,12 @@
+<div class="container">
+  <h1 class="text-center">Apartments</h1>
+  <div class="row">
+    <% @apartments.each do |apt| %>
+      <div class="col-12 col-md-6 col-lg-4 border p-3 mb-3">
+        <h2><%= apt.title %></h2>
+        <b><%= apt.created_at.to_date.strftime("%d/%m/%Y") %></b>
+        <p><%= apt.content %></p>
+      </div>
+    <% end %>
+  </div>
+</div>
