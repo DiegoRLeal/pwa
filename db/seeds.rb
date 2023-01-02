@@ -1,5 +1,5 @@
 Apartment.destroy_all
-User.destroy_all
+# User.destroy_all
 
 
 10.times do |i|
