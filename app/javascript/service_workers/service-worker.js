@@ -107,3 +107,47 @@ self.addEventListener('push', function(event) {
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
+
+
+
+
+// const preLoad = function () {
+//   return caches.open("offline").then(function (cache) {
+//       // caching index and important routes
+//       return cache.addAll(filesToCache);
+//   });
+// };
+
+// self.addEventListener("install", function (event) {
+//   event.waitUntil(preLoad());
+// });
+
+// const filesToCache = ["/eteacher/", "/eteacher/offline.html"];
+
+// const checkResponse = function (request) {
+//   return new Promise(function (fulfill, reject) {
+//       fetch(request).then(function (response) {
+//           if (response.status !== 404) {
+//               fulfill(response);
+//           } else {
+//               reject();
+//           }
+//       }, reject);
+//   });
+// };
+
+// const addToCache = function (request) {
+//   return caches.open("offline").then(function (cache) {
+//       return fetch(request).then(function (response) {
+//           return cache.put(request, response);
+//       });
+//   });
+// };
+
+// self.addEventListener("fetch", function (event) {
+//   if (!(event.request.url.indexOf("http") === 0)) return;
+
+//   if (!event.request.url.startsWith("http")) {
+//       event.waitUntil(addToCache(event.request));
+//   }
+// });
