@@ -3,151 +3,225 @@ const CACHE_NAME = `offline V${OFFLINE_VERSION}`;
 const OFFLINE_URL = 'offline';
 const OFFLINE_IMG = 'apple-icon.png';
 
-function urlB64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+// function urlB64ToUint8Array(base64String) {
+//   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+//   const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
 
-  const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
+//   const rawData = atob(base64);
+//   const outputArray = new Uint8Array(rawData.length);
 
-  for (var i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
+//   for (var i = 0; i < rawData.length; ++i) {
+//     outputArray[i] = rawData.charCodeAt(i);
+//   }
+//   return outputArray;
+// }
 
-self.addEventListener('install', function(event) {
-  console.log('Service Worker installing.');
-  self.skipWaiting();
-  event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    // Setting {cache: 'reload'} in the new request will ensure that the response
-    // isn't fulfilled from the HTTP cache; i.e., it will be from the network.
-    // here the offline url and image are stored in the cache
-   await Promise.all([OFFLINE_URL, OFFLINE_IMG].map((path) => {
-      cache.add(new Request(path, {cache: 'reload'}));
-    }));
-  })());
-});
-
-self.addEventListener('activate', async function(event) {
-  console.log('Service Worker activated.');
-
-  // // Tell the active service worker to take control of the page immediately.
-  self.clients.claim();
-
-  let cacheWhitelist = [CACHE_NAME];
-  event.waitUntil((async () => {
-    // Enable navigation preload if it's supported.
-    // See https://developers.google.com/web/updates/2017/02/navigation-preload
-    if ('navigationPreload' in self.registration) {
-      await self.registration.navigationPreload.enable();
-    }
-
-    // Delete old versions of CACHE_NAME
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  })());
-
-  try {
-    const applicationServerKey = urlB64ToUint8Array('<YOUR_PUBLIC_KEY_FOR_NOTIFICATION_PUSH>')
-    const options = { applicationServerKey, userVisibleOnly: true }
-    const subscription = await self.registration.pushManager.subscribe(options)
-    console.log(JSON.stringify(subscription))
-  } catch (err) {
-    console.log('Error', err)
-  }
-});
-
-self.addEventListener('fetch', function(event) {
-  console.log('Service Worker fetching.');
-  // We only want to call event.respondWith() if this is a navigation request
-  // for an HTML page.
-  event.respondWith((async () => {
-    try {
-      // First, try to use the navigation preload response if it's supported.
-      const preloadResponse = await event.preloadResponse;
-      if (preloadResponse) {
-        return preloadResponse;
-      }
-
-      return await caches.match(event.request) || await fetch(event.request);
-    } catch (error) {
-      // catch is only triggered if an exception is thrown, which is likely
-      // due to a network error.
-      // If fetch() returns a valid HTTP response with a response code in
-      // the 4xx or 5xx range, the catch() will NOT be called.
-      console.log('Fetch failed; returning offline page instead.', error);
-
-      const cache = await caches.open(CACHE_NAME);
-      const cachedResponse = await cache.match(OFFLINE_URL);
-      return cachedResponse;
-    }
-  })());
-});
-
-// for the notification push
-self.addEventListener('push', function(event) {
-  console.log('[Service Worker] Push Received.');
-  console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
-
-  const title = 'Notification from PWA-test app';
-  const options = {
-    body: event.data.text(),
-    icon: OFFLINE_IMG,
-    badge: OFFLINE_IMG
-  };
-
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
-
-
-
-// const preLoad = function () {
-//   return caches.open("offline").then(function (cache) {
-//       // caching index and important routes
-//       return cache.addAll(filesToCache);
-//   });
-// };
-
-// self.addEventListener("install", function (event) {
-//   event.waitUntil(preLoad());
+// self.addEventListener('install', function(event) {
+//   console.log('Service Worker installing.');
+//   self.skipWaiting();
+//   event.waitUntil((async () => {
+//     const cache = await caches.open(CACHE_NAME);
+//     // Setting {cache: 'reload'} in the new request will ensure that the response
+//     // isn't fulfilled from the HTTP cache; i.e., it will be from the network.
+//     // here the offline url and image are stored in the cache
+//    await Promise.all([OFFLINE_URL, OFFLINE_IMG].map((path) => {
+//       cache.add(new Request(path, {cache: 'reload'}));
+//     }));
+//   })());
 // });
 
-// const filesToCache = ["/eteacher/", "/eteacher/offline.html"];
+// self.addEventListener('activate', async function(event) {
+//   console.log('Service Worker activated.');
 
-// const checkResponse = function (request) {
-//   return new Promise(function (fulfill, reject) {
-//       fetch(request).then(function (response) {
-//           if (response.status !== 404) {
-//               fulfill(response);
-//           } else {
-//               reject();
+//   // // Tell the active service worker to take control of the page immediately.
+//   self.clients.claim();
+
+//   let cacheWhitelist = [CACHE_NAME];
+//   event.waitUntil((async () => {
+//     // Enable navigation preload if it's supported.
+//     // See https://developers.google.com/web/updates/2017/02/navigation-preload
+//     if ('navigationPreload' in self.registration) {
+//       await self.registration.navigationPreload.enable();
+//     }
+
+//     // Delete old versions of CACHE_NAME
+//     caches.keys().then(function(cacheNames) {
+//       return Promise.all(
+//         cacheNames.map(function(cacheName) {
+//           if (cacheWhitelist.indexOf(cacheName) === -1) {
+//             return caches.delete(cacheName);
 //           }
-//       }, reject);
-//   });
-// };
+//         })
+//       );
+//     })
+//   })());
 
-// const addToCache = function (request) {
-//   return caches.open("offline").then(function (cache) {
-//       return fetch(request).then(function (response) {
-//           return cache.put(request, response);
-//       });
-//   });
-// };
-
-// self.addEventListener("fetch", function (event) {
-//   if (!(event.request.url.indexOf("http") === 0)) return;
-
-//   if (!event.request.url.startsWith("http")) {
-//       event.waitUntil(addToCache(event.request));
+//   try {
+//     const applicationServerKey = urlB64ToUint8Array('<YOUR_PUBLIC_KEY_FOR_NOTIFICATION_PUSH>')
+//     const options = { applicationServerKey, userVisibleOnly: true }
+//     const subscription = await self.registration.pushManager.subscribe(options)
+//     console.log(JSON.stringify(subscription))
+//   } catch (err) {
+//     console.log('Error', err)
 //   }
 // });
+
+// self.addEventListener('fetch', function(event) {
+//   console.log('Service Worker fetching.');
+//   // We only want to call event.respondWith() if this is a navigation request
+//   // for an HTML page.
+//   event.respondWith((async () => {
+//     try {
+//       // First, try to use the navigation preload response if it's supported.
+//       const preloadResponse = await event.preloadResponse;
+//       if (preloadResponse) {
+//         return preloadResponse;
+//       }
+
+//       return await caches.match(event.request) || await fetch(event.request);
+//     } catch (error) {
+//       // catch is only triggered if an exception is thrown, which is likely
+//       // due to a network error.
+//       // If fetch() returns a valid HTTP response with a response code in
+//       // the 4xx or 5xx range, the catch() will NOT be called.
+//       console.log('Fetch failed; returning offline page instead.', error);
+
+//       const cache = await caches.open(CACHE_NAME);
+//       const cachedResponse = await cache.match(OFFLINE_URL);
+//       return cachedResponse;
+//     }
+//   })());
+// });
+
+// // for the notification push
+// self.addEventListener('push', function(event) {
+//   console.log('[Service Worker] Push Received.');
+//   console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
+
+//   const title = 'Notification from PWA-test app';
+//   const options = {
+//     body: event.data.text(),
+//     icon: OFFLINE_IMG,
+//     badge: OFFLINE_IMG
+//   };
+
+//   event.waitUntil(self.registration.showNotification(title, options));
+// });
+
+
+
+
+
+
+
+
+
+
+
+// Set a name for the current cache
+var cacheName = 'v1';
+
+// Default files to always cache
+var cacheFiles = [
+	'./',
+	'./index.html',
+	'./js/app.js',
+	'./css/reset.css',
+	'./css/style.css',
+	'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic'
+]
+
+
+self.addEventListener('install', function(e) {
+    console.log('[ServiceWorker] Installed');
+
+    // e.waitUntil Delays the event until the Promise is resolved
+    e.waitUntil(
+
+    	// Open the cache
+	    caches.open(cacheName).then(function(cache) {
+
+	    	// Add all the default files to the cache
+			console.log('[ServiceWorker] Caching cacheFiles');
+			return cache.addAll(cacheFiles);
+	    })
+	); // end e.waitUntil
+});
+
+
+self.addEventListener('activate', function(e) {
+    console.log('[ServiceWorker] Activated');
+
+    e.waitUntil(
+
+    	// Get all the cache keys (cacheName)
+		caches.keys().then(function(cacheNames) {
+			return Promise.all(cacheNames.map(function(thisCacheName) {
+
+				// If a cached item is saved under a previous cacheName
+				if (thisCacheName !== cacheName) {
+
+					// Delete that cached file
+					console.log('[ServiceWorker] Removing Cached Files from Cache - ', thisCacheName);
+					return caches.delete(thisCacheName);
+				}
+			}));
+		})
+	); // end e.waitUntil
+
+});
+
+
+self.addEventListener('fetch', function(e) {
+	console.log('[ServiceWorker] Fetch', e.request.url);
+
+	// e.respondWidth Responds to the fetch event
+	e.respondWith(
+
+		// Check in cache for the request being made
+		caches.match(e.request)
+
+
+			.then(function(response) {
+
+				// If the request is in the cache
+				if ( response ) {
+					console.log("[ServiceWorker] Found in Cache", e.request.url, response);
+					// Return the cached version
+					return response;
+				}
+
+				// If the request is NOT in the cache, fetch and cache
+
+				var requestClone = e.request.clone();
+				fetch(requestClone)
+					.then(function(response) {
+
+						if ( !response ) {
+							console.log("[ServiceWorker] No response from fetch ")
+							return response;
+						}
+
+						var responseClone = response.clone();
+
+						//  Open the cache
+						caches.open(cacheName).then(function(cache) {
+
+							// Put the fetched response in the cache
+							cache.put(e.request, responseClone);
+							console.log('[ServiceWorker] New Data Cached', e.request.url);
+
+							// Return the response
+							return response;
+
+				        }); // end caches.open
+
+					})
+					.catch(function(err) {
+						console.log('[ServiceWorker] Error Fetching & Caching New Data', err);
+					});
+
+
+			}) // end caches.match(e.request)
+	); // end e.respondWith
+});
