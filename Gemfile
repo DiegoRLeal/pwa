@@ -77,3 +77,9 @@ group :test do
 end
 gem 'webpacker'
 gem 'devise'
+gem 'webpush'
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
+gem "omniauth-rails_csrf_protection", "~> 1.0"
+gem "cloudinary"
+gem 'pry', '~> 0.13.1'

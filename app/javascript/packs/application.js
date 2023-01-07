@@ -1,3 +1,8 @@
+// External imports
+import "bootstrap";
+// Internal imports
+import askPushNotifications from '../plugins/push_notifications';
+
 window.addEventListener('load', () => {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register('/service-worker.js').then(registration => {
@@ -30,4 +35,10 @@ window.addEventListener('load', () => {
 // force to relaod the page when internet connexion is offline to render the offline page in cache
 window.addEventListener('offline', () => {
   window.location.reload();
+});
+
+
+
+document.addEventListener('turbolinks:load', () => {
+  askPushNotifications();
 });
