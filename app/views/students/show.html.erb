@@ -3,7 +3,11 @@
   <p><%= image_tag "https://res.cloudinary.com/ddxlnxcu5/image/upload/v1670340467/logo_brasas_2015-02__1_-removebg-preview_g81ytp.png", class:"img"%></p>
     </div>
  <h3 class="Title"><strong> Student </strong><h3>
-  <p><%= image_tag(@student.photo, :width=>200, :crop=>"scale", class:"img1") %></p>
+<%#if @student.photo.present? %>
+  <center><p><%= image_tag(@student.photo, :width=>200, :crop=>"scale", class:"img1") %></p></center>
+  <%# else %>
+  <center><%#= image_tag 'https://res.cloudinary.com/ddxlnxcu5/image/upload/v1670340467/logo_brasas_2015-02__1_-removebg-preview_g81ytp.png', :width=>200, :crop=>"scale", class:"img1" %></center>
+<%# end %>
 <br>
       <h5><strong>Code: </strong><%= @student.codigo %><h5>
       <h6><strong>Name: </strong><%= @student.name %><h6>
